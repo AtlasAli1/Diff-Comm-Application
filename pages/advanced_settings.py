@@ -9,6 +9,12 @@ from loguru import logger
 import json
 import numpy as np
 
+# Import approval workflow
+try:
+    from utils.approval_workflow import display_approval_dashboard
+except ImportError:
+    display_approval_dashboard = None
+
 def advanced_settings_page():
     """Advanced settings page with manual splits, audit trails, and system administration"""
     st.title("🔧 Advanced Settings")
@@ -40,6 +46,7 @@ def advanced_settings_page():
     # Advanced settings tabs
     tabs = st.tabs([
         "✂️ Manual Commission Splits",
+        "🔔 Approval Workflow",
         "📊 Audit Trail",
         "👥 User Management",
         "⚙️ System Administration",
@@ -51,18 +58,21 @@ def advanced_settings_page():
         manual_commission_splits()
     
     with tabs[1]:
-        audit_trail_management()
+        approval_workflow_management()
     
     with tabs[2]:
-        user_management()
+        audit_trail_management()
     
     with tabs[3]:
-        system_administration()
+        user_management()
     
     with tabs[4]:
-        data_migration_tools()
+        system_administration()
     
     with tabs[5]:
+        data_migration_tools()
+    
+    with tabs[6]:
         performance_monitoring()
 
 def manual_commission_splits():
@@ -286,6 +296,13 @@ def display_existing_splits(calc):
                 
                 if st.button(f"📊 Apply Split", key=f"apply_{job_id}", use_container_width=True):
                     apply_commission_split(job_id, split, calc)
+
+def approval_workflow_management():
+    """Manage commission approval workflow"""
+    if display_approval_dashboard:
+        display_approval_dashboard()
+    else:
+        st.warning("Approval workflow module not available")
 
 def audit_trail_management():
     """Manage audit trail and system logs"""

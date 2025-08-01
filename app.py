@@ -14,6 +14,13 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from models import Employee, BusinessUnit, CommissionCalculator
 from utils import DatabaseManager, AuthManager, ExportManager, DataValidator
+from utils.notifications import (
+    NotificationManager, 
+    display_notification_center, 
+    display_notification_badge,
+    notify_commission_calculated,
+    notify_data_import_complete
+)
 from pages import (
     data_management_page,
     system_configuration_page,
@@ -297,6 +304,14 @@ def display_sidebar():
             </div>
             """, unsafe_allow_html=True)
             
+            # Notification section
+            col1, col2 = st.columns([3, 1])
+            with col1:
+                if st.button("🔔 Notifications", use_container_width=True):
+                    st.session_state.show_notifications = True
+            with col2:
+                display_notification_badge()
+            
             if st.button("🚪 Logout", use_container_width=True):
                 st.session_state.auth_manager.logout()
         
@@ -435,6 +450,14 @@ def main():
     
     # Display sidebar
     display_sidebar()
+    
+    # Check if notification center should be shown
+    if st.session_state.get('show_notifications', False):
+        st.session_state.show_notifications = False
+        display_notification_center()
+        if st.button("← Back to Main", use_container_width=False):
+            st.rerun()
+        return
     
     # Main navigation
     pages = {

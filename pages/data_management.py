@@ -12,6 +12,7 @@ from models import Employee, BusinessUnit
 from utils import DataValidator
 from utils.timesheet_processor import TimesheetProcessor
 from utils.revenue_processor import RevenueProcessor
+from utils.notifications import notify_data_import_complete, NotificationManager
 
 def data_management_page():
     """Enhanced data management page with multiple import/export options"""
@@ -162,9 +163,23 @@ def process_timesheet_uploads(files):
             all_processed_data.append(processed_df)
             st.success(f"✅ {file.name} - {summary['total_employees']} employees processed")
             
+            # Send notification for successful import
+            notify_data_import_complete(
+                file_name=file.name,
+                records=summary['total_employees'],
+                status="success"
+            )
+            
         except Exception as e:
             errors.append(f"Error processing {file.name}: {str(e)}")
             st.error(f"❌ Failed to process {file.name}: {str(e)}")
+            
+            # Send notification for failed import
+            notify_data_import_complete(
+                file_name=file.name,
+                records=0,
+                status=str(e)
+            )
     
     progress_bar.empty()
     status_text.empty()

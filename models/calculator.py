@@ -7,6 +7,12 @@ from loguru import logger
 from .employee import Employee
 from .business_unit import BusinessUnit, Commission, CommissionSplit
 
+# Try to import notifications, but don't fail if not available
+try:
+    from utils.notifications import notify_commission_calculated
+except ImportError:
+    notify_commission_calculated = None
+
 class CommissionCalculator:
     """Enhanced commission calculator with audit trails and advanced features"""
     
@@ -211,6 +217,14 @@ class CommissionCalculator:
                 )
                 
                 self.commissions.append(commission)
+                
+                # Send notification if available
+                if notify_commission_calculated and commission_amount > 0:
+                    notify_commission_calculated(
+                        employee_name=employee.name,
+                        amount=float(commission_amount),
+                        period=f"{period_start.date()} to {period_end.date()}"
+                    )
         
         self.log_action('calculate_commissions', {
             'period_start': period_start,
