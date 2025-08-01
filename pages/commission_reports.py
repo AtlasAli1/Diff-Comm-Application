@@ -6,6 +6,12 @@ from datetime import datetime, timedelta
 import io
 from typing import Dict, List, Any
 
+# Import email service
+try:
+    from utils.email_service import EmailService, display_email_configuration, display_email_scheduler, send_test_email
+except ImportError:
+    EmailService = None
+
 def commission_reports_page():
     """Enhanced commission reports with multiple formats and advanced features"""
     st.title("📋 Commission Reports")
@@ -41,7 +47,8 @@ def commission_reports_page():
         "🏢 Business Unit Reports",
         "📈 Commission Breakdown",
         "💰 Payroll Export",
-        "📄 Custom Reports"
+        "📄 Custom Reports",
+        "📧 Email Reports"
     ])
     
     with tabs[0]:
@@ -61,6 +68,9 @@ def commission_reports_page():
     
     with tabs[5]:
         custom_reports(calc, export_mgr)
+    
+    with tabs[6]:
+        email_reports_management(calc, export_mgr)
 
 def executive_summary_report(calc, export_mgr):
     """Generate executive summary report"""
@@ -957,3 +967,238 @@ def export_commission_breakdown(df, export_mgr):
         file_name=f"commission_breakdown_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
+
+def email_reports_management(calc, export_mgr):
+    """Email reports management interface"""
+    st.subheader("📧 Email Reports")
+    
+    if not EmailService:
+        st.warning("Email service not available. Please install required dependencies.")
+        return
+    
+    email_service = EmailService()
+    
+    # Create sub-tabs for email functionality
+    email_tabs = st.tabs([
+        "📤 Send Reports",
+        "⚙️ Email Settings", 
+        "📅 Scheduled Reports",
+        "🧪 Test Email"
+    ])
+    
+    with email_tabs[0]:
+        send_commission_reports(calc, email_service)
+    
+    with email_tabs[1]:
+        display_email_configuration()
+    
+    with email_tabs[2]:
+        display_email_scheduler()
+    
+    with email_tabs[3]:
+        send_test_email()
+
+def send_commission_reports(calc, email_service):
+    """Interface for sending commission reports via email"""
+    st.subheader("📤 Send Commission Reports")
+    
+    if not email_service.config.is_configured():
+        st.warning("Please configure email settings first")
+        return
+    
+    # Report type selection
+    report_type = st.selectbox(
+        "Report Type",
+        ["Individual Commission Report", "Executive Summary", "Business Unit Summary"]
+    )
+    
+    if report_type == "Individual Commission Report":
+        # Individual employee reports
+        st.markdown("### Send Individual Commission Reports")
+        
+        # Get employees with commissions
+        employees_with_commissions = {}
+        for commission in calc.commissions:
+            emp = calc.employees.get(commission.employee_id)
+            if emp:
+                if emp.id not in employees_with_commissions:
+                    employees_with_commissions[emp.id] = {
+                        'name': emp.name,
+                        'email': emp.email if hasattr(emp, 'email') else '',
+                        'commissions': []
+                    }
+                employees_with_commissions[emp.id]['commissions'].append(commission)
+        
+        if not employees_with_commissions:
+            st.info("No employees with commissions found")
+            return
+        
+        # Employee selection
+        selected_employees = st.multiselect(
+            "Select Employees",
+            options=list(employees_with_commissions.keys()),
+            format_func=lambda x: employees_with_commissions[x]['name']
+        )
+        
+        # Email addresses input
+        email_addresses = {}
+        for emp_id in selected_employees:
+            emp_data = employees_with_commissions[emp_id]
+            default_email = emp_data['email']
+            email_addresses[emp_id] = st.text_input(
+                f"Email for {emp_data['name']}",
+                value=default_email,
+                key=f"email_{emp_id}"
+            )
+        
+        # Send options
+        col1, col2 = st.columns(2)
+        with col1:
+            include_pdf = st.checkbox("Include PDF attachment", value=True)
+        with col2:
+            send_copy_to_manager = st.checkbox("Send copy to manager")
+        
+        manager_email = ""
+        if send_copy_to_manager:
+            manager_email = st.text_input("Manager email address")
+        
+        # Send button
+        if st.button("📧 Send Commission Reports", type="primary", use_container_width=True):
+            if not selected_employees:
+                st.error("Please select at least one employee")
+                return
+            
+            success_count = 0
+            error_count = 0
+            
+            progress_bar = st.progress(0)
+            status_text = st.empty()
+            
+            for i, emp_id in enumerate(selected_employees):
+                emp_data = employees_with_commissions[emp_id]
+                email = email_addresses.get(emp_id)
+                
+                if not email:
+                    st.warning(f"No email address for {emp_data['name']}")
+                    error_count += 1
+                    continue
+                
+                status_text.text(f"Sending report to {emp_data['name']}...")
+                
+                # Prepare commission data for this employee
+                commission_data = prepare_employee_commission_data(emp_data, calc)
+                
+                # Send email
+                recipients = [email]
+                if send_copy_to_manager and manager_email:
+                    recipients.append(manager_email)
+                
+                success, message = email_service.send_commission_report(
+                    recipient_email=email,
+                    recipient_name=emp_data['name'],
+                    commission_data=commission_data
+                )
+                
+                if success:
+                    success_count += 1
+                    st.success(f"✅ Sent to {emp_data['name']}")
+                else:
+                    error_count += 1
+                    st.error(f"❌ Failed to send to {emp_data['name']}: {message}")
+                
+                progress_bar.progress((i + 1) / len(selected_employees))
+            
+            progress_bar.empty()
+            status_text.empty()
+            
+            # Summary
+            if success_count > 0:
+                st.success(f"Successfully sent {success_count} reports")
+            if error_count > 0:
+                st.error(f"Failed to send {error_count} reports")
+    
+    elif report_type == "Executive Summary":
+        # Executive summary report
+        st.markdown("### Send Executive Summary Report")
+        
+        recipients = st.text_area(
+            "Recipient Email Addresses (one per line)",
+            help="Enter email addresses of executives/managers"
+        )
+        
+        recipient_list = [email.strip() for email in recipients.split('\n') if email.strip()]
+        
+        if recipient_list and st.button("📧 Send Executive Summary", type="primary"):
+            # Prepare summary data
+            summary_data = prepare_executive_summary_data(calc)
+            
+            success, message = email_service.send_summary_report(
+                recipients=recipient_list,
+                summary_data=summary_data
+            )
+            
+            if success:
+                st.success(f"Executive summary sent to {len(recipient_list)} recipients")
+            else:
+                st.error(f"Failed to send executive summary: {message}")
+    
+    else:  # Business Unit Summary
+        st.markdown("### Send Business Unit Summary Reports")
+        st.info("Business unit summary reports coming soon")
+
+def prepare_employee_commission_data(emp_data, calc):
+    """Prepare commission data for email template"""
+    commissions = emp_data['commissions']
+    
+    total_commission = sum(float(c.amount) for c in commissions)
+    
+    # Get employee object for hours
+    emp = calc.employees.get(commissions[0].employee_id)
+    total_hours = float(emp.total_hours) if emp else 0
+    
+    effective_rate = total_commission / total_hours if total_hours > 0 else 0
+    
+    # Prepare details
+    details = []
+    for comm in commissions:
+        business_unit = calc.business_units.get(comm.business_unit_id)
+        if business_unit:
+            details.append({
+                'business_unit': business_unit.name,
+                'hours': float(emp.regular_hours + emp.ot_hours + emp.dt_hours) if emp else 0,
+                'revenue': float(business_unit.revenue),
+                'rate': float(business_unit.commission_rate),
+                'amount': float(comm.amount)
+            })
+    
+    return {
+        'period': f"{commissions[0].period_start.date()} to {commissions[0].period_end.date()}",
+        'period_start': commissions[0].period_start.strftime('%Y-%m-%d'),
+        'period_end': commissions[0].period_end.strftime('%Y-%m-%d'),
+        'total_commission': total_commission,
+        'total_hours': total_hours,
+        'effective_rate': effective_rate,
+        'details': details
+    }
+
+def prepare_executive_summary_data(calc):
+    """Prepare executive summary data for email"""
+    total_revenue = sum(float(unit.revenue) for unit in calc.business_units.values())
+    total_commissions = sum(float(c.amount) for c in calc.commissions)
+    commission_rate = (total_commissions / total_revenue * 100) if total_revenue > 0 else 0
+    employee_count = len([emp for emp in calc.employees.values() if emp.total_hours > 0])
+    
+    # Get period from first commission
+    period = "Current Period"
+    if calc.commissions:
+        first_comm = calc.commissions[0]
+        period = f"{first_comm.period_start.date()} to {first_comm.period_end.date()}"
+    
+    return {
+        'period': period,
+        'total_revenue': total_revenue,
+        'total_commissions': total_commissions,
+        'commission_rate': commission_rate,
+        'employee_count': employee_count,
+        'additional_content': '<p>For detailed breakdowns, please access the Commission Calculator Pro dashboard.</p>'
+    }
