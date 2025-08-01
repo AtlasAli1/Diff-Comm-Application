@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Streamlit Connection Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .test { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Streamlit Connection Diagnostics</h1>
+    
+    <div class="test">
+        <h3>JavaScript Test</h3>
+        <p id="js-test">❌ JavaScript is disabled</p>
+        <script>
+            document.getElementById('js-test').innerHTML = '✅ JavaScript is working';
+            document.getElementById('js-test').className = 'success';
+        </script>
+    </div>
+    
+    <div class="test">
+        <h3>Streamlit URLs to Test</h3>
+        <p>Click each link to test the Streamlit applications:</p>
+        <ul>
+            <li><a href="http://127.0.0.1:8501" target="_blank">🧪 Test App (Port 8501)</a></li>
+            <li><a href="http://localhost:8501" target="_blank">🧪 Test App (localhost)</a></li>
+            <li><a href="http://127.0.0.1:8502" target="_blank">🐛 Debug App (Port 8502)</a></li>
+            <li><a href="http://127.0.0.1:8503" target="_blank">💰 Main App (Port 8503)</a></li>
+        </ul>
+    </div>
+    
+    <div class="test">
+        <h3>AJAX Connection Test</h3>
+        <button onclick="testConnection()">Test Connection to Streamlit</button>
+        <div id="connection-result"></div>
+    </div>
+    
+    <div class="test">
+        <h3>Troubleshooting Tips</h3>
+        <ul>
+            <li><strong>If JavaScript is disabled:</strong> Enable JavaScript in browser settings</li>
+            <li><strong>If links don't work:</strong> Try different browser or incognito mode</li>
+            <li><strong>If getting "This site can't be reached":</strong> Check firewall settings</li>
+            <li><strong>If page loads but appears blank:</strong> Check browser console for errors (F12)</li>
+        </ul>
+    </div>
+    
+    <div class="test">
+        <h3>Expected Behavior</h3>
+        <p>When Streamlit apps work correctly, you should see:</p>
+        <ul>
+            <li>🧪 <strong>Test App:</strong> "Test Application" title with buttons and counter</li>
+            <li>🐛 <strong>Debug App:</strong> "Debug Main App" with step-by-step component loading</li>  
+            <li>💰 <strong>Main App:</strong> "Commission Calculator Pro" login screen</li>
+        </ul>
+    </div>
+
+    <script>
+        function testConnection() {
+            const resultDiv = document.getElementById('connection-result');
+            resultDiv.innerHTML = '🔄 Testing connection...';
+            
+            fetch('http://127.0.0.1:8501')
+                .then(response => {
+                    if (response.ok) {
+                        resultDiv.innerHTML = '✅ Connection successful! Streamlit server is responding.';
+                        resultDiv.className = 'success';
+                    } else {
+                        resultDiv.innerHTML = `❌ Connection failed: ${response.status} ${response.statusText}`;
+                        resultDiv.className = 'error';
+                    }
+                })
+                .catch(error => {
+                    resultDiv.innerHTML = `❌ Connection error: ${error.message}`;
+                    resultDiv.className = 'error';
+                });
+        }
+    </script>
+</body>
+</html>
