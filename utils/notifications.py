@@ -4,7 +4,15 @@ Real-time notification system for commission updates
 
 import streamlit as st
 from datetime import datetime
-from typing import List, Dict, Optional, Literal
+from typing import List, Dict, Optional
+try:
+    from typing import Literal  # Python 3.8+
+except ImportError:
+    try:
+        from typing_extensions import Literal  # Python 3.7
+    except ImportError:
+        # Fallback for older Python versions
+        Literal = None
 from enum import Enum
 import json
 from pathlib import Path

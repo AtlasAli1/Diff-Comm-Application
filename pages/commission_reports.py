@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
+from decimal import Decimal
 import io
 from typing import Dict, List, Any
 

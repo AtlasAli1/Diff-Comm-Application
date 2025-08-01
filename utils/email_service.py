@@ -8,7 +8,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email import encoders
 import os
-from typing import List, Dict, Optional, Union
+from typing import List, Dict, Optional, Union, Tuple
 from datetime import datetime
 import json
 from pathlib import Path
@@ -208,7 +208,7 @@ class EmailService:
         self.scheduler_thread = None
         self.scheduler_running = False
     
-    def test_connection(self) -> tuple[bool, str]:
+    def test_connection(self) -> Tuple[bool, str]:
         """Test email connection"""
         if not self.config.is_configured():
             return False, "Email service not configured"
@@ -231,7 +231,7 @@ class EmailService:
         attachments: Optional[List[Dict[str, any]]] = None,
         cc: Optional[List[str]] = None,
         bcc: Optional[List[str]] = None
-    ) -> tuple[bool, str]:
+    ) -> Tuple[bool, str]:
         """Send email with optional attachments"""
         
         if not self.config.is_configured():
@@ -292,7 +292,7 @@ class EmailService:
         recipient_name: str,
         commission_data: Dict,
         attachment: Optional[bytes] = None
-    ) -> tuple[bool, str]:
+    ) -> Tuple[bool, str]:
         """Send commission report email"""
         
         # Prepare template data
@@ -328,7 +328,7 @@ class EmailService:
         self,
         recipients: List[str],
         summary_data: Dict
-    ) -> tuple[bool, str]:
+    ) -> Tuple[bool, str]:
         """Send executive summary report"""
         
         # Prepare template data

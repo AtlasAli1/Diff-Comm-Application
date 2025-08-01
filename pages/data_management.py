@@ -27,15 +27,23 @@ def data_management_page():
         try:
             from utils import DataValidator
             st.session_state.validator = DataValidator()
-        except:
-            st.warning("Data validator not available - some validation features may be limited")
+        except ImportError as e:
+            st.warning(f"Data validator not available: {str(e)}")
+            st.session_state.validator = None
+        except Exception as e:
+            st.error(f"Error initializing validator: {str(e)}")
+            st.session_state.validator = None
     
     if 'db_manager' not in st.session_state:
         try:
             from utils import DatabaseManager
             st.session_state.db_manager = DatabaseManager()
-        except:
-            st.warning("Database manager not available - some database features may be limited")
+        except ImportError as e:
+            st.warning(f"Database manager not available: {str(e)}")
+            st.session_state.db_manager = None
+        except Exception as e:
+            st.error(f"Error initializing database manager: {str(e)}")
+            st.session_state.db_manager = None
     
     # Create tabs for different data management functions
     tabs = st.tabs([
