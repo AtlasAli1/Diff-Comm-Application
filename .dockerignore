@@ -1,0 +1,53 @@
+# Commission Calculator Pro - Docker ignore file
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Session storage (runtime data)
+api_session_storage/
+
+# Test artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Documentation drafts
+*.md.backup
+
+# Large data files
+*.xlsx
+*.xls
+!Revenue.xlsx
+
+# Temporary files
+tmp/
+temp/
+*.tmp
