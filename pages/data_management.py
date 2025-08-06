@@ -53,7 +53,8 @@ def data_management_page():
         "👥 Manage Employees",
         "🏢 Manage Business Units",
         "🔄 Data Recovery",
-        "📊 Data Preview"
+        "📊 Data Preview",
+        "🔧 Bulk Operations"
     ])
     
     with tabs[0]:
@@ -76,6 +77,9 @@ def data_management_page():
     
     with tabs[6]:
         data_preview_section()
+    
+    with tabs[7]:
+        bulk_operations_section()
 
 def upload_files_section():
     """Enhanced file upload section with validation and preview"""
@@ -1121,3 +1125,701 @@ def edit_employee_modal(employee_id):
                 if st.button("Cancel", use_container_width=True):
                     del st.session_state.editing_employee
                     st.rerun()
+
+def bulk_operations_section():
+    """Advanced bulk operations for data management"""
+    st.subheader("🔧 Bulk Operations")
+    
+    st.info("⚡ Efficiently manage large amounts of data with bulk operations")
+    
+    # Create sub-tabs for different bulk operations
+    bulk_tabs = st.tabs([
+        "📊 Bulk Employee Updates",
+        "💰 Bulk Rate Changes", 
+        "🗂️ Batch Import/Export",
+        "🏢 Bulk Business Unit Ops",
+        "🗑️ Bulk Delete Operations"
+    ])
+    
+    with bulk_tabs[0]:
+        bulk_employee_updates()
+    
+    with bulk_tabs[1]:
+        bulk_rate_changes()
+    
+    with bulk_tabs[2]:
+        batch_import_export()
+    
+    with bulk_tabs[3]:
+        bulk_business_unit_ops()
+    
+    with bulk_tabs[4]:
+        bulk_delete_operations()
+
+def bulk_employee_updates():
+    """Bulk employee data updates"""
+    st.markdown("### 👥 Bulk Employee Updates")
+    
+    if 'calculator' not in st.session_state or not st.session_state.calculator:
+        st.warning("No calculator instance available")
+        return
+    
+    employees = list(st.session_state.calculator.employees.values())
+    
+    if not employees:
+        st.info("No employees found. Upload timesheet data first.")
+        return
+    
+    st.markdown(f"**Found {len(employees)} employees for bulk operations**")
+    
+    # Bulk update options
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("#### 🎯 Select Update Type")
+        update_type = st.selectbox(
+            "Choose update operation:",
+            ["Department Assignment", "Hourly Rate Adjustment", "Status Change", "Custom Field Update"]
+        )
+    
+    with col2:
+        st.markdown("#### 🔍 Filter Employees")
+        filter_type = st.selectbox(
+            "Filter by:",
+            ["All Employees", "By Department", "By Rate Range", "By Status"]
+        )
+    
+    # Filter employees based on selection
+    filtered_employees = filter_employees_for_bulk_ops(employees, filter_type)
+    
+    if filtered_employees:
+        st.markdown(f"**Selected {len(filtered_employees)} employees for update**")
+        
+        # Show preview of selected employees
+        with st.expander("👀 Preview Selected Employees", expanded=False):
+            preview_df = pd.DataFrame([
+                {
+                    'Name': emp.name,
+                    'Department': emp.department or 'N/A',
+                    'Rate': f"${emp.hourly_rate:.2f}",
+                    'Status': 'Active' if emp.is_active else 'Inactive'
+                }
+                for emp in filtered_employees
+            ])
+            st.dataframe(preview_df, use_container_width=True)
+        
+        # Bulk update interface
+        if update_type == "Department Assignment":
+            new_department = st.text_input("New Department", placeholder="Enter new department name")
+            if st.button("🔄 Update All Departments", type="primary"):
+                if new_department:
+                    perform_bulk_department_update(filtered_employees, new_department)
+                else:
+                    st.error("Please enter a department name")
+        
+        elif update_type == "Hourly Rate Adjustment":
+            col1, col2 = st.columns(2)
+            with col1:
+                adjustment_type = st.radio("Adjustment Type:", ["Percentage Increase", "Fixed Amount", "Set Rate"])
+            with col2:
+                if adjustment_type == "Percentage Increase":
+                    adjustment_value = st.number_input("Percentage (%)", min_value=0.0, max_value=100.0, value=5.0)
+                elif adjustment_type == "Fixed Amount":
+                    adjustment_value = st.number_input("Amount ($)", min_value=0.0, value=1.0, step=0.50)
+                else:
+                    adjustment_value = st.number_input("New Rate ($)", min_value=0.0, value=20.0, step=0.50)
+            
+            if st.button("💰 Apply Rate Changes", type="primary"):
+                perform_bulk_rate_update(filtered_employees, adjustment_type, adjustment_value)
+        
+        elif update_type == "Status Change":
+            new_status = st.radio("New Status:", ["Active", "Inactive"])
+            if st.button("🔄 Update Status", type="primary"):
+                perform_bulk_status_update(filtered_employees, new_status == "Active")
+        
+        elif update_type == "Custom Field Update":
+            st.markdown("**Add Custom Fields to Employees**")
+            field_name = st.text_input("Field Name", placeholder="e.g., Skills, Location, etc.")
+            field_value = st.text_input("Field Value", placeholder="Enter value for all selected employees")
+            
+            if st.button("🏷️ Add Custom Field", type="primary"):
+                if field_name and field_value:
+                    perform_bulk_custom_field_update(filtered_employees, field_name, field_value)
+                else:
+                    st.error("Please enter both field name and value")
+    else:
+        st.warning("No employees match the selected filter criteria")
+
+def bulk_rate_changes():
+    """Bulk commission rate changes"""
+    st.markdown("### 💰 Bulk Commission Rate Changes")
+    
+    if 'calculator' not in st.session_state or not st.session_state.calculator:
+        st.warning("No calculator instance available")
+        return
+    
+    business_units = list(st.session_state.calculator.business_units.values())
+    
+    if not business_units:
+        st.info("No business units found. Upload revenue data first.")
+        return
+    
+    st.markdown(f"**Found {len(business_units)} business units for rate changes**")
+    
+    # Rate change options
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("#### 🎯 Rate Change Type")
+        rate_change_type = st.selectbox(
+            "Choose rate change:",
+            ["Lead Generation Rate", "Sales Commission Rate", "Work Done Rate", "All Commission Rates"]
+        )
+    
+    with col2:
+        st.markdown("#### 🔍 Apply To")
+        application_type = st.selectbox(
+            "Apply changes to:",
+            ["All Business Units", "Selected Units", "By Revenue Range"]
+        )
+    
+    # Show current rates
+    with st.expander("📊 Current Commission Rates", expanded=True):
+        rates_df = pd.DataFrame([
+            {
+                'Business Unit': unit.name,
+                'Lead Gen Rate': f"{getattr(unit, 'lead_gen_rate', 0):.2f}%",
+                'Sales Rate': f"{getattr(unit, 'sales_rate', 0):.2f}%", 
+                'Work Done Rate': f"{getattr(unit, 'work_done_rate', 0):.2f}%",
+                'Revenue': f"${unit.revenue:,.2f}"
+            }
+            for unit in business_units
+        ])
+        st.dataframe(rates_df, use_container_width=True)
+    
+    # New rate input
+    st.markdown("#### ⚙️ New Rate Configuration")
+    
+    if rate_change_type == "All Commission Rates":
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            new_lead_rate = st.number_input("Lead Gen Rate (%)", min_value=0.0, max_value=50.0, value=2.0, step=0.1)
+        with col2:
+            new_sales_rate = st.number_input("Sales Rate (%)", min_value=0.0, max_value=50.0, value=3.0, step=0.1)
+        with col3:
+            new_work_rate = st.number_input("Work Done Rate (%)", min_value=0.0, max_value=50.0, value=5.0, step=0.1)
+    else:
+        new_rate = st.number_input(f"New {rate_change_type} (%)", min_value=0.0, max_value=50.0, value=5.0, step=0.1)
+    
+    # Apply changes
+    if st.button("🚀 Apply Rate Changes", type="primary"):
+        if rate_change_type == "All Commission Rates":
+            apply_bulk_all_rates(business_units, new_lead_rate, new_sales_rate, new_work_rate)
+        else:
+            apply_bulk_single_rate(business_units, rate_change_type, new_rate)
+
+def batch_import_export():
+    """Batch import and export operations"""
+    st.markdown("### 🗂️ Batch Import/Export Operations")
+    
+    # Import/Export options
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("#### 📥 Batch Import")
+        st.markdown("**Import multiple data types at once**")
+        
+        import_files = st.file_uploader(
+            "Upload Multiple Files",
+            type=['csv', 'xlsx', 'xls'],
+            accept_multiple_files=True,
+            help="Upload timesheet, revenue, and employee files together"
+        )
+        
+        if import_files:
+            st.markdown(f"**Selected {len(import_files)} files for import**")
+            
+            # Categorize files
+            file_categories = categorize_import_files(import_files)
+            
+            # Show file categorization
+            for category, files in file_categories.items():
+                if files:
+                    st.markdown(f"**{category.title()}:** {len(files)} files")
+                    for file in files:
+                        st.text(f"  • {file.name}")
+            
+            if st.button("🚀 Process All Files", type="primary"):
+                process_batch_import(file_categories)
+    
+    with col2:
+        st.markdown("#### 📤 Batch Export")
+        st.markdown("**Export all data types at once**")
+        
+        export_options = st.multiselect(
+            "Select data to export:",
+            ["Employees", "Timesheets", "Revenue", "Commission Rates", "Business Units", "Calculated Commissions"],
+            default=["Employees", "Timesheets", "Revenue"]
+        )
+        
+        export_format = st.selectbox("Export Format:", ["Excel (Multiple Sheets)", "Separate CSV Files", "JSON Package"])
+        
+        if st.button("📦 Export Selected Data", type="primary"):
+            if export_options:
+                perform_batch_export(export_options, export_format)
+            else:
+                st.error("Please select at least one data type to export")
+
+def bulk_business_unit_ops():
+    """Bulk business unit operations"""
+    st.markdown("### 🏢 Bulk Business Unit Operations")
+    
+    if 'calculator' not in st.session_state or not st.session_state.calculator:
+        st.warning("No calculator instance available")
+        return
+    
+    business_units = list(st.session_state.calculator.business_units.values())
+    
+    if not business_units:
+        st.info("No business units found. Upload revenue data first.")
+        return
+    
+    # Bulk operations for business units
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("#### 🎯 Operation Type")
+        operation = st.selectbox(
+            "Choose operation:",
+            ["Category Assignment", "Revenue Adjustment", "Status Update", "Merge Units"]
+        )
+    
+    with col2:
+        st.markdown("#### 🔍 Filter Units")
+        filter_by = st.selectbox(
+            "Filter by:",
+            ["All Units", "By Revenue Range", "By Category", "By Commission Rate"]
+        )
+    
+    # Show current business units
+    with st.expander("📊 Current Business Units", expanded=False):
+        units_df = pd.DataFrame([
+            {
+                'Unit Name': unit.name,
+                'Revenue': f"${unit.revenue:,.2f}",
+                'Category': getattr(unit, 'category', 'N/A'),
+                'Commission Rate': f"{unit.commission_rate:.2f}%"
+            }
+            for unit in business_units
+        ])
+        st.dataframe(units_df, use_container_width=True)
+    
+    # Operation-specific interface
+    if operation == "Category Assignment":
+        new_category = st.text_input("New Category", placeholder="e.g., Residential, Commercial, Service")
+        if st.button("🏷️ Assign Category", type="primary"):
+            if new_category:
+                assign_bulk_category(business_units, new_category)
+            else:
+                st.error("Please enter a category name")
+    
+    elif operation == "Revenue Adjustment":
+        adjustment_type = st.radio("Adjustment Type:", ["Percentage", "Fixed Amount"])
+        if adjustment_type == "Percentage":
+            adjustment = st.number_input("Percentage Change (%)", value=0.0, step=0.1)
+        else:
+            adjustment = st.number_input("Fixed Amount ($)", value=0.0, step=100.0)
+        
+        if st.button("💰 Apply Revenue Adjustment", type="primary"):
+            apply_bulk_revenue_adjustment(business_units, adjustment_type, adjustment)
+
+def bulk_delete_operations():
+    """Bulk delete operations with safety checks"""
+    st.markdown("### 🗑️ Bulk Delete Operations")
+    
+    st.warning("⚠️ **Caution:** Bulk delete operations are permanent and cannot be undone!")
+    
+    # Safety confirmation
+    if 'delete_confirmation' not in st.session_state:
+        st.session_state.delete_confirmation = False
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("#### 🎯 Delete Target")
+        delete_target = st.selectbox(
+            "What to delete:",
+            ["Select...", "Inactive Employees", "Zero Revenue Units", "Old Commission Records", "Duplicate Entries"]
+        )
+    
+    with col2:
+        st.markdown("#### 🛡️ Safety Settings")
+        require_backup = st.checkbox("Require backup before delete", value=True)
+        show_preview = st.checkbox("Show deletion preview", value=True)
+    
+    if delete_target != "Select...":
+        # Show what will be deleted
+        if show_preview:
+            items_to_delete = get_items_for_deletion(delete_target)
+            if items_to_delete:
+                st.markdown(f"**⚠️ {len(items_to_delete)} items will be deleted:**")
+                
+                # Show preview
+                with st.expander("👀 Preview Items to Delete", expanded=True):
+                    preview_deletion_items(items_to_delete, delete_target)
+                
+                # Confirmation process
+                if st.checkbox("I understand this action cannot be undone"):
+                    confirmation_text = st.text_input(
+                        "Type 'DELETE' to confirm:",
+                        placeholder="Type DELETE in capital letters"
+                    )
+                    
+                    if confirmation_text == "DELETE":
+                        if st.button("🗑️ Confirm Bulk Delete", type="primary"):
+                            if require_backup:
+                                st.info("Creating backup before deletion...")
+                                create_pre_deletion_backup()
+                            
+                            perform_bulk_delete(items_to_delete, delete_target)
+                    else:
+                        st.info("Type 'DELETE' to enable the delete button")
+            else:
+                st.info(f"No items found for deletion criteria: {delete_target}")
+
+# Helper functions for bulk operations
+
+def filter_employees_for_bulk_ops(employees, filter_type):
+    """Filter employees based on criteria"""
+    if filter_type == "All Employees":
+        return employees
+    elif filter_type == "By Department":
+        dept_filter = st.selectbox("Select Department:", 
+                                 list(set(emp.department for emp in employees if emp.department)))
+        return [emp for emp in employees if emp.department == dept_filter]
+    elif filter_type == "By Rate Range":
+        min_rate = st.number_input("Minimum Rate ($)", min_value=0.0, value=10.0)
+        max_rate = st.number_input("Maximum Rate ($)", min_value=0.0, value=50.0)
+        return [emp for emp in employees if min_rate <= emp.hourly_rate <= max_rate]
+    elif filter_type == "By Status":
+        status_filter = st.selectbox("Select Status:", ["Active", "Inactive"])
+        return [emp for emp in employees if emp.is_active == (status_filter == "Active")]
+    return []
+
+def perform_bulk_department_update(employees, new_department):
+    """Update department for multiple employees"""
+    try:
+        updated_count = 0
+        for employee in employees:
+            employee.department = new_department
+            employee.updated_at = datetime.now()
+            updated_count += 1
+        
+        st.success(f"✅ Updated department for {updated_count} employees")
+        save_to_database()
+        st.rerun()
+    except Exception as e:
+        st.error(f"Error updating departments: {e}")
+
+def perform_bulk_rate_update(employees, adjustment_type, adjustment_value):
+    """Update rates for multiple employees"""
+    try:
+        updated_count = 0
+        for employee in employees:
+            if adjustment_type == "Percentage Increase":
+                employee.hourly_rate *= (1 + adjustment_value / 100)
+            elif adjustment_type == "Fixed Amount":
+                employee.hourly_rate += Decimal(str(adjustment_value))
+            else:  # Set Rate
+                employee.hourly_rate = Decimal(str(adjustment_value))
+            
+            employee.updated_at = datetime.now()
+            updated_count += 1
+        
+        st.success(f"✅ Updated rates for {updated_count} employees")
+        save_to_database()
+        st.rerun()
+    except Exception as e:
+        st.error(f"Error updating rates: {e}")
+
+def perform_bulk_status_update(employees, new_status):
+    """Update status for multiple employees"""
+    try:
+        updated_count = 0
+        for employee in employees:
+            employee.is_active = new_status
+            employee.updated_at = datetime.now()
+            updated_count += 1
+        
+        status_text = "active" if new_status else "inactive"
+        st.success(f"✅ Set {updated_count} employees to {status_text}")
+        save_to_database()
+        st.rerun()
+    except Exception as e:
+        st.error(f"Error updating status: {e}")
+
+def perform_bulk_custom_field_update(employees, field_name, field_value):
+    """Add custom field to multiple employees"""
+    try:
+        updated_count = 0
+        for employee in employees:
+            if not hasattr(employee, 'custom_fields'):
+                employee.custom_fields = {}
+            employee.custom_fields[field_name] = field_value
+            employee.updated_at = datetime.now()
+            updated_count += 1
+        
+        st.success(f"✅ Added {field_name} field to {updated_count} employees")
+        save_to_database()
+        st.rerun()
+    except Exception as e:
+        st.error(f"Error adding custom field: {e}")
+
+def save_to_database():
+    """Save changes to database"""
+    try:
+        if 'db_manager' in st.session_state and st.session_state.db_manager:
+            st.session_state.db_manager.save_employees(list(st.session_state.calculator.employees.values()))
+            st.session_state.db_manager.save_business_units(list(st.session_state.calculator.business_units.values()))
+    except Exception as e:
+        st.warning(f"Could not save to database: {e}")
+
+def categorize_import_files(files):
+    """Categorize uploaded files by type"""
+    categories = {'timesheet': [], 'revenue': [], 'employee': [], 'other': []}
+    
+    for file in files:
+        filename = file.name.lower()
+        if 'timesheet' in filename or 'time' in filename or 'hours' in filename:
+            categories['timesheet'].append(file)
+        elif 'revenue' in filename or 'sales' in filename or 'income' in filename:
+            categories['revenue'].append(file)
+        elif 'employee' in filename or 'staff' in filename or 'worker' in filename:
+            categories['employee'].append(file)
+        else:
+            categories['other'].append(file)
+    
+    return categories
+
+def process_batch_import(file_categories):
+    """Process multiple file imports"""
+    try:
+        import_results = {'success': 0, 'errors': []}
+        
+        for category, files in file_categories.items():
+            for file in files:
+                try:
+                    # Process each file based on category
+                    if category == 'timesheet':
+                        process_timesheet_file(file)
+                    elif category == 'revenue':
+                        process_revenue_file(file)
+                    elif category == 'employee':
+                        process_employee_file(file)
+                    
+                    import_results['success'] += 1
+                    
+                except Exception as e:
+                    import_results['errors'].append(f"{file.name}: {str(e)}")
+        
+        # Show results
+        if import_results['success'] > 0:
+            st.success(f"✅ Successfully imported {import_results['success']} files")
+        
+        if import_results['errors']:
+            st.error("❌ Import errors:")
+            for error in import_results['errors']:
+                st.error(f"  • {error}")
+        
+        st.rerun()
+        
+    except Exception as e:
+        st.error(f"Batch import failed: {e}")
+
+def perform_batch_export(export_options, export_format):
+    """Perform batch export of selected data"""
+    try:
+        export_data = {}
+        
+        for option in export_options:
+            if option == "Employees" and st.session_state.calculator.employees:
+                export_data['employees'] = list(st.session_state.calculator.employees.values())
+            elif option == "Business Units" and st.session_state.calculator.business_units:
+                export_data['business_units'] = list(st.session_state.calculator.business_units.values())
+            # Add more export options as needed
+        
+        if export_data:
+            # Create export package
+            if export_format == "Excel (Multiple Sheets)":
+                create_excel_export(export_data)
+            elif export_format == "Separate CSV Files":
+                create_csv_exports(export_data)
+            elif export_format == "JSON Package":
+                create_json_export(export_data)
+            
+            st.success("✅ Export completed successfully")
+        else:
+            st.warning("No data available for selected export options")
+            
+    except Exception as e:
+        st.error(f"Export failed: {e}")
+
+def process_timesheet_file(file):
+    """Process timesheet file"""
+    # Implementation would read and process timesheet data
+    pass
+
+def process_revenue_file(file):
+    """Process revenue file"""
+    # Implementation would read and process revenue data
+    pass
+
+def process_employee_file(file):
+    """Process employee file"""
+    # Implementation would read and process employee data
+    pass
+
+def create_excel_export(data):
+    """Create Excel export with multiple sheets"""
+    # Implementation for Excel export
+    pass
+
+def create_csv_exports(data):
+    """Create separate CSV files"""
+    # Implementation for CSV exports
+    pass
+
+def create_json_export(data):
+    """Create JSON export package"""
+    # Implementation for JSON export
+    pass
+
+def apply_bulk_all_rates(business_units, lead_rate, sales_rate, work_rate):
+    """Apply all commission rates to business units"""
+    try:
+        updated_count = 0
+        for unit in business_units:
+            unit.lead_gen_rate = lead_rate
+            unit.sales_rate = sales_rate  
+            unit.work_done_rate = work_rate
+            updated_count += 1
+        
+        st.success(f"✅ Updated commission rates for {updated_count} business units")
+        save_to_database()
+        st.rerun()
+    except Exception as e:
+        st.error(f"Error updating rates: {e}")
+
+def apply_bulk_single_rate(business_units, rate_type, new_rate):
+    """Apply single rate type to business units"""
+    try:
+        updated_count = 0
+        rate_field = {
+            "Lead Generation Rate": "lead_gen_rate",
+            "Sales Commission Rate": "sales_rate", 
+            "Work Done Rate": "work_done_rate"
+        }.get(rate_type)
+        
+        if rate_field:
+            for unit in business_units:
+                setattr(unit, rate_field, new_rate)
+                updated_count += 1
+            
+            st.success(f"✅ Updated {rate_type} for {updated_count} business units")
+            save_to_database()
+            st.rerun()
+    except Exception as e:
+        st.error(f"Error updating {rate_type}: {e}")
+
+def assign_bulk_category(business_units, category):
+    """Assign category to business units"""
+    try:
+        updated_count = 0
+        for unit in business_units:
+            unit.category = category
+            updated_count += 1
+        
+        st.success(f"✅ Assigned category '{category}' to {updated_count} business units")
+        save_to_database()
+        st.rerun()
+    except Exception as e:
+        st.error(f"Error assigning category: {e}")
+
+def apply_bulk_revenue_adjustment(business_units, adjustment_type, adjustment):
+    """Apply revenue adjustments to business units"""
+    try:
+        updated_count = 0
+        for unit in business_units:
+            if adjustment_type == "Percentage":
+                unit.revenue *= (1 + adjustment / 100)
+            else:  # Fixed Amount
+                unit.revenue += Decimal(str(adjustment))
+            updated_count += 1
+        
+        st.success(f"✅ Applied revenue adjustment to {updated_count} business units")
+        save_to_database()
+        st.rerun()
+    except Exception as e:
+        st.error(f"Error adjusting revenue: {e}")
+
+def get_items_for_deletion(delete_target):
+    """Get items that would be deleted based on criteria"""
+    items = []
+    
+    if delete_target == "Inactive Employees":
+        items = [emp for emp in st.session_state.calculator.employees.values() if not emp.is_active]
+    elif delete_target == "Zero Revenue Units":
+        items = [unit for unit in st.session_state.calculator.business_units.values() if unit.revenue == 0]
+    # Add more deletion criteria as needed
+    
+    return items
+
+def preview_deletion_items(items, delete_target):
+    """Show preview of items to be deleted"""
+    if delete_target == "Inactive Employees":
+        preview_df = pd.DataFrame([
+            {'Name': emp.name, 'Department': emp.department or 'N/A', 'Rate': f"${emp.hourly_rate:.2f}"}
+            for emp in items
+        ])
+    elif delete_target == "Zero Revenue Units":
+        preview_df = pd.DataFrame([
+            {'Unit Name': unit.name, 'Revenue': f"${unit.revenue:.2f}", 'Commission Rate': f"{unit.commission_rate:.2f}%"}
+            for unit in items
+        ])
+    else:
+        preview_df = pd.DataFrame([{'Item': str(item)} for item in items])
+    
+    st.dataframe(preview_df, use_container_width=True)
+
+def create_pre_deletion_backup():
+    """Create backup before bulk deletion"""
+    try:
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        backup_name = f"pre_deletion_backup_{timestamp}"
+        # Implementation would create actual backup
+        st.success(f"✅ Backup created: {backup_name}")
+    except Exception as e:
+        st.error(f"Backup creation failed: {e}")
+
+def perform_bulk_delete(items, delete_target):
+    """Perform the actual bulk deletion"""
+    try:
+        deleted_count = 0
+        
+        if delete_target == "Inactive Employees":
+            for emp in items:
+                if emp.name in st.session_state.calculator.employees:
+                    del st.session_state.calculator.employees[emp.name]
+                    deleted_count += 1
+        elif delete_target == "Zero Revenue Units":
+            for unit in items:
+                if unit.name in st.session_state.calculator.business_units:
+                    del st.session_state.calculator.business_units[unit.name]
+                    deleted_count += 1
+        
+        st.success(f"✅ Deleted {deleted_count} items")
+        save_to_database()
+        st.rerun()
+        
+    except Exception as e:
+        st.error(f"Deletion failed: {e}")

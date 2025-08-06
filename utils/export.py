@@ -105,6 +105,8 @@ class ExportManager:
         payroll_data = []
         
         for item in commission_data:
+            # Note helpers/apprentices should have zero commission
+            is_helper = item.get('is_helper', False)
             payroll_data.append({
                 'Employee ID': item.get('employee_id', ''),
                 'Employee Name': item.get('employee_name', ''),
@@ -115,9 +117,10 @@ class ExportManager:
                 'DT Hours': item.get('dt_hours', 0),
                 'Hourly Rate': item.get('hourly_rate', 0),
                 'Labor Cost': item.get('labor_cost', 0),
-                'Commission Amount': item.get('commission_amount', 0),
-                'Total Earnings': item.get('total_earnings', 0),
+                'Commission Amount': 0 if is_helper else item.get('commission_amount', 0),
+                'Total Earnings': item.get('labor_cost', 0) + (0 if is_helper else item.get('commission_amount', 0)),
                 'Department': item.get('department', ''),
+                'Helper/Apprentice': 'Yes' if is_helper else 'No',
                 'Status': 'Approved'
             })
         
@@ -169,7 +172,8 @@ class ExportManager:
                 'Labor Cost': emp['labor_cost'],
                 'Commission': emp['total_commission'],
                 'Total Earnings': emp['total_earnings'],
-                'Status': 'Active' if emp['employee']['is_active'] else 'Inactive'
+                'Status': 'Active' if emp['employee']['is_active'] else 'Inactive',
+                'Helper/Apprentice': 'Yes' if emp['employee'].get('is_helper', False) else 'No'
             })
         
         return pd.DataFrame(report_data)

@@ -1,0 +1,30 @@
+[
+  {
+    "employee_name": "Test Employee",
+    "regular_hours": 40.0,
+    "ot_hours": 5.0,
+    "dt_hours": 0.0,
+    "date": "2025-08-01"
+  },
+  {
+    "employee_name": "Test Calc Employee",
+    "regular_hours": 40.0,
+    "ot_hours": 5.0,
+    "dt_hours": 0.0,
+    "date": "2025-08-01"
+  },
+  {
+    "employee_name": "Test Employee",
+    "regular_hours": 40.0,
+    "ot_hours": 5.0,
+    "dt_hours": 0.0,
+    "date": "2025-08-01"
+  },
+  {
+    "employee_name": "Test Calc Employee",
+    "regular_hours": 40.0,
+    "ot_hours": 5.0,
+    "dt_hours": 0.0,
+    "date": "2025-08-01"
+  }
+]

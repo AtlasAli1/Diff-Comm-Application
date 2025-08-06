@@ -183,10 +183,10 @@ class CommissionCalculator:
             
             commission_pool = unit.commission_amount
             
-            # Get active employees with hours
+            # Get active employees with hours (exclude helpers/apprentices)
             active_employees = [
                 emp for emp in self.employees.values() 
-                if emp.is_active and emp.total_hours > 0
+                if emp.is_active and emp.total_hours > 0 and not getattr(emp, 'is_helper', False)
             ]
             
             if not active_employees:

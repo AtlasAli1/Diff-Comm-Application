@@ -1,0 +1,21 @@
+# FastAPI and API dependencies
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+python-multipart==0.0.6
+
+# Data processing (already in main requirements)
+pandas>=1.5.0
+numpy>=1.24.0
+
+# System monitoring
+psutil==5.9.6
+
+# Development and testing
+pytest==7.4.3
+pytest-asyncio==0.21.1
+httpx==0.25.2
+
+# Documentation
+mkdocs==1.5.3
+mkdocs-material==9.4.8

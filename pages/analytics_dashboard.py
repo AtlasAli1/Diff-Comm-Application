@@ -658,30 +658,42 @@ def trends_and_forecasting(calc):
     # Growth metrics
     col1, col2, col3 = st.columns(3)
     
-    with col1:
-        revenue_growth = ((df_hist.iloc[-1]['Revenue'] - df_hist.iloc[0]['Revenue']) / df_hist.iloc[0]['Revenue'] * 100)
-        st.metric(
-            "Revenue Growth",
-            f"{revenue_growth:+.1f}%",
-            f"${df_hist.iloc[-1]['Revenue'] - df_hist.iloc[0]['Revenue']:,.0f}"
-        )
-    
-    with col2:
-        profit_growth = ((df_hist.iloc[-1]['Profit'] - df_hist.iloc[0]['Profit']) / df_hist.iloc[0]['Profit'] * 100)
-        st.metric(
-            "Profit Growth",
-            f"{profit_growth:+.1f}%",
-            f"${df_hist.iloc[-1]['Profit'] - df_hist.iloc[0]['Profit']:,.0f}"
-        )
-    
-    with col3:
-        margin_current = df_hist.iloc[-1]['Profit'] / df_hist.iloc[-1]['Revenue'] * 100
-        margin_start = df_hist.iloc[0]['Profit'] / df_hist.iloc[0]['Revenue'] * 100
-        st.metric(
-            "Profit Margin",
-            f"{margin_current:.1f}%",
-            f"{margin_current - margin_start:+.1f}%"
-        )
+    if len(df_hist) > 0:
+        with col1:
+            if df_hist.iloc[0]['Revenue'] != 0:
+                revenue_growth = ((df_hist.iloc[-1]['Revenue'] - df_hist.iloc[0]['Revenue']) / df_hist.iloc[0]['Revenue'] * 100)
+                st.metric(
+                    "Revenue Growth",
+                    f"{revenue_growth:+.1f}%",
+                    f"${df_hist.iloc[-1]['Revenue'] - df_hist.iloc[0]['Revenue']:,.0f}"
+                )
+            else:
+                st.metric("Revenue Growth", "N/A", "Starting from $0")
+        
+        with col2:
+            if df_hist.iloc[0]['Profit'] != 0:
+                profit_growth = ((df_hist.iloc[-1]['Profit'] - df_hist.iloc[0]['Profit']) / df_hist.iloc[0]['Profit'] * 100)
+                st.metric(
+                    "Profit Growth",
+                    f"{profit_growth:+.1f}%",
+                    f"${df_hist.iloc[-1]['Profit'] - df_hist.iloc[0]['Profit']:,.0f}"
+                )
+            else:
+                st.metric("Profit Growth", "N/A", "Starting from $0")
+        
+        with col3:
+            if df_hist.iloc[-1]['Revenue'] != 0 and df_hist.iloc[0]['Revenue'] != 0:
+                margin_current = df_hist.iloc[-1]['Profit'] / df_hist.iloc[-1]['Revenue'] * 100
+                margin_start = df_hist.iloc[0]['Profit'] / df_hist.iloc[0]['Revenue'] * 100
+                st.metric(
+                    "Profit Margin",
+                    f"{margin_current:.1f}%",
+                    f"{margin_current - margin_start:+.1f}%"
+                )
+            else:
+                st.metric("Profit Margin", "N/A", "Insufficient data")
+    else:
+        st.warning("No historical data available for growth metrics")
     
     # Simple forecast
     st.divider()

@@ -12,10 +12,11 @@ class Employee(BaseModel):
     ot_hours: Decimal = Field(default=Decimal('0'), ge=0)
     dt_hours: Decimal = Field(default=Decimal('0'), ge=0)
     department: Optional[str] = None
-    employee_id: Optional[str] = None
+    employee_id: Optional[int] = None
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
     is_active: bool = True
+    is_helper: bool = Field(default=False, description="Helper/Apprentice status - not eligible for commissions")
     metadata: Dict[str, Any] = Field(default_factory=dict)
     
     @validator('name')
@@ -23,6 +24,12 @@ class Employee(BaseModel):
         if not v.strip():
             raise ValueError('Employee name cannot be empty')
         return v.strip()
+    
+    @validator('employee_id')
+    def validate_employee_id(cls, v):
+        if v is not None and v <= 0:
+            raise ValueError('Employee ID must be a positive integer')
+        return v
     
     @validator('hourly_rate', 'regular_hours', 'ot_hours', 'dt_hours')
     def validate_positive_and_round(cls, v):
@@ -81,6 +88,7 @@ class Employee(BaseModel):
             'department': self.department,
             'employee_id': self.employee_id,
             'is_active': self.is_active,
+            'is_helper': self.is_helper,
             'created_at': self.created_at.isoformat(),
             'updated_at': self.updated_at.isoformat()
         }

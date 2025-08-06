@@ -1,16 +1,16 @@
-# Diff-Comm Application 💰✨
+# Commission Calculator Pro 💰✨
 
 <div align="center">
 
-![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
+![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.28+-red.svg)
-![License](https://img.shields.io/badge/License-Proprietary-green.svg)
-![Platform](https://img.shields.io/badge/Platform-Web-orange.svg)
-![Database](https://img.shields.io/badge/Database-SQLite-lightgrey.svg)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)
+![License](https://img.shields.io/badge/License-Proprietary-orange.svg)
+![Platform](https://img.shields.io/badge/Platform-Web%20%2B%20API-purple.svg)
 
-**A powerful, enterprise-grade commission management system designed to simplify and automate commission calculations**
+**A powerful, enterprise-grade commission management system with dual web interface and REST API backend**
 
-[Features](#-features) • [Demo](#-demo) • [Installation](#-installation) • [Documentation](#-documentation) • [Support](#-support)
+[Features](#-features) • [Quick Start](#-quick-start) • [API Documentation](#-api-documentation) • [Architecture](#-architecture) • [Support](#-support)
 
 </div>
 
@@ -18,320 +18,332 @@
 
 ## 🎯 Overview
 
-**Diff-Comm Application** (Commission Calculator Pro) is a comprehensive commission management platform built with modern web technologies. It streamlines the complex process of calculating employee commissions based on hours worked and business unit revenue, providing real-time analytics, automated reporting, and secure multi-user access.
+**Commission Calculator Pro** is a comprehensive commission management platform featuring both an interactive Streamlit web interface and a production-ready REST API backend. It streamlines complex commission calculations with automated pay periods, multi-technician job handling, and sophisticated business logic.
 
-### 🔥 Why Diff-Comm?
+### 🔥 What Makes It Special?
 
-- **📊 Real-time Analytics** - Interactive dashboards with live data visualization
-- **🔐 Enterprise Security** - Role-based access control and audit trails
-- **📈 Smart Calculations** - Automated commission calculations with manual override options
-- **📱 Modern UI** - Clean, responsive interface built with Streamlit
-- **💾 Reliable Storage** - SQLite database with automatic backups
-- **📄 Export Ready** - Generate payroll-ready reports in multiple formats
+- **🏗️ Dual Architecture** - Web interface for users + REST API for integrations
+- **🧮 Complex Business Logic** - Lead gen, sales, and work done commissions with efficiency pay
+- **📅 Automated Pay Periods** - Generate entire year schedules with multiple frequencies
+- **👥 Smart Employee Management** - Bulk operations, status tracking, and rate overrides
+- **📊 Advanced Analytics** - Real-time dashboards with interactive visualizations
+- **🔄 Scalable Design** - From 8,800-line monolith to clean modular architecture
+- **🧪 Production Ready** - Comprehensive testing, health monitoring, and deployment tools
 
 ## 🌟 Features
 
-### 📥 Data Management
-- **Multi-format Import** - Excel (.xlsx), CSV support with intelligent parsing
-- **Smart Validation** - Automatic data validation with detailed error reporting
-- **Template System** - Pre-built templates for consistent data entry
-- **Bulk Operations** - Edit multiple records simultaneously
-- **Version Control** - Track all changes with comprehensive audit logs
-
 ### 💰 Commission Engine
-- **Flexible Rates** - Individual hourly rates per employee
-- **Dynamic Percentages** - Customizable commission rates by business unit
-- **Manual Splits** - Distribute commissions across teams
-- **Multi-period Support** - Handle various pay periods (weekly/bi-weekly/monthly)
-- **Advanced Calculations** - Support for regular, overtime, and double-time hours
+- **Three Commission Types**:
+  - **Lead Generation** - Commission for generating leads
+  - **Sales** - Commission for closing sales  
+  - **Work Done** - Commission split among assigned technicians
+- **Efficiency Pay Model** - Max of hourly pay vs commission (incentivizes performance)
+- **Employee Rate Overrides** - Custom commission rates per employee per business unit
+- **Multi-technician Support** - Automatically split work commissions among multiple techs
 
-### 📊 Analytics Dashboard
-- **Executive Overview** - Key performance indicators at a glance
-- **Revenue Analysis** - Detailed breakdowns by business unit
-- **Employee Metrics** - Individual performance tracking
-- **Trend Analysis** - Historical comparisons and forecasting
-- **Custom Visualizations** - Interactive Plotly charts
+### 📅 Pay Period Management  
+- **Multiple Schedules** - Weekly, Bi-weekly, Semi-monthly, Monthly
+- **Automated Generation** - Create entire year of pay periods from configuration
+- **Current Period Detection** - Automatically identify active pay period
+- **Pay Date Calculation** - Configurable delay between period end and pay date
 
-### 📄 Reporting Suite
-- **Executive Reports** - High-level summaries for management
-- **Detailed Breakdowns** - Employee-specific commission details
-- **Payroll Integration** - Export-ready formats for payroll systems
-- **Custom Reports** - Build reports with specific criteria
-- **Scheduled Reports** - Automated report generation
+### 👥 Employee Management
+- **Full CRUD Operations** - Create, read, update, delete with validation
+- **Status Tracking** - Active, Inactive, Helper/Apprentice, Excluded from Payroll
+- **Bulk Import** - CSV/Excel employee data with validation and error reporting
+- **Smart Auto-Add** - Automatically detect employees from timesheet data
+- **Commission Plans** - Hourly + Commission or Efficiency Pay models
 
-### 🔒 Security & Administration
-- **User Management** - Four-tier access control system
-- **Secure Authentication** - Bcrypt password encryption
-- **Session Management** - Automatic timeout and secure sessions
-- **Audit Trail** - Complete activity logging for compliance
-- **Data Backup** - Automated backup with restore capabilities
+### 📊 Business Intelligence
+- **Interactive Dashboard** - KPIs, trends, and performance metrics
+- **Revenue Analytics** - Business unit performance with visual charts
+- **Employee Insights** - Individual performance tracking and summaries
+- **Real-time Calculations** - Live commission previews and adjustments
 
-## 🖼️ Demo
+### 📤 Data Processing
+- **Multi-format Support** - CSV, Excel (.xlsx, .xls) with intelligent parsing
+- **Advanced Validation** - Comprehensive error checking with detailed reporting
+- **Template System** - Download standardized CSV templates
+- **Batch Processing** - Optimized handling of large datasets (5,000+ records)
 
-<div align="center">
+## 🚀 Quick Start
 
-### Dashboard View
-![Dashboard](https://via.placeholder.com/800x400/4285F4/FFFFFF?text=Analytics+Dashboard)
+### Web Interface (Streamlit)
 
-### Commission Report
-![Report](https://via.placeholder.com/800x400/34A853/FFFFFF?text=Commission+Report)
-
-### Data Management
-![Data](https://via.placeholder.com/800x400/EA4335/FFFFFF?text=Data+Management)
-
-</div>
-
-## 🚀 Installation
-
-### Prerequisites
-- Python 3.8 or higher
-- pip package manager
-- 2GB RAM minimum
-- Modern web browser
-
-### Quick Start
-
-1. **Clone the repository**
 ```bash
+# Clone the repository
 git clone https://github.com/AtlasAli1/Diff-Comm-Application.git
 cd Diff-Comm-Application
-```
 
-2. **Create virtual environment** (recommended)
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
-
-3. **Install dependencies**
-```bash
+# Install dependencies
 pip install -r requirements.txt
+
+# Start the web application  
+streamlit run app_modular.py
+
+# Access at http://localhost:8501
 ```
 
-4. **Run the application**
+### REST API Backend
+
 ```bash
-python run.py
+# Install API dependencies
+pip install -r requirements-api.txt
+
+# Start the API server
+python start_api.py --reload
+
+# Access API at http://localhost:8000
+# Interactive docs at http://localhost:8000/docs
 ```
 
-5. **Access the application**
-```
-Open your browser and navigate to http://localhost:8501
-Default credentials: admin / admin123
-```
+### Run Tests
 
-### 🐳 Docker Installation
 ```bash
-docker build -t diff-comm-app .
-docker run -p 8501:8501 diff-comm-app
+# Test the API endpoints
+python test_api.py
+
+# Test commission calculations
+python test_commission_calculator.py
+
+# Display implementation summary
+python api_summary.py
 ```
 
-## 📚 Documentation
+## 🔗 API Documentation
 
-### User Roles & Permissions
+### Core Endpoints
 
-| Role | Description | Permissions |
-|------|-------------|------------|
-| **Admin** | System administrators | Full access to all features |
-| **Manager** | Department managers | View all data, generate reports, manage settings |
-| **Editor** | Data entry personnel | Upload/edit data, view own reports |
-| **Viewer** | Read-only users | View reports and dashboards only |
+#### Employee Management
+- `GET /api/v1/employees` - List employees with filtering & pagination
+- `POST /api/v1/employees` - Create new employee  
+- `PUT /api/v1/employees/{id}` - Update employee
+- `DELETE /api/v1/employees/{id}` - Delete employee
+- `GET /api/v1/employees/summary` - Employee statistics
+- `POST /api/v1/employees/bulk` - Bulk create employees
 
-### File Format Requirements
+#### Commission Calculations
+- `POST /api/v1/commissions/calculate` - Calculate commissions with complex business logic
+- `GET /api/v1/commissions/summary` - Commission summary for date ranges
+- `POST /api/v1/commissions/calculate-for-pay-period` - Calculate for specific pay period
 
-#### Timesheet Format
-| Column | Type | Required | Description |
-|--------|------|----------|-------------|
-| Employee Name | String | ✅ | Full name of employee |
-| Regular Hours | Float | ✅ | Standard hours worked |
-| OT Hours | Float | ✅ | Overtime hours |
-| DT Hours | Float | ✅ | Double-time hours |
-| Department | String | ❌ | Optional department field |
+#### Pay Period Management
+- `GET /api/v1/pay-periods` - List pay periods
+- `GET /api/v1/pay-periods/current` - Get current active pay period
+- `POST /api/v1/pay-periods/generate` - Generate pay periods from schedule
+- `GET /api/v1/pay-periods/stats` - Pay period statistics
 
-#### Revenue Format
-| Column | Type | Required | Description |
-|--------|------|----------|-------------|
-| Business Unit | String | ✅ | Name of business unit |
-| Revenue | Float | ✅ | Total revenue generated |
-| Period | Date | ✅ | Revenue period |
+#### Data Upload
+- `POST /api/v1/upload/timesheet` - Upload timesheet data with validation
+- `POST /api/v1/upload/revenue` - Upload revenue data with validation
+- `POST /api/v1/upload/employees` - Bulk employee import
+- `GET /api/v1/upload/templates/{type}` - Download CSV templates
 
-## 🛠️ Configuration
+#### Business Unit Configuration
+- `GET /api/v1/business-units` - List business units with commission rates
+- `POST /api/v1/business-units` - Create business unit with rates
+- `PUT /api/v1/business-units/{id}` - Update business unit
+- `DELETE /api/v1/business-units/{id}` - Delete business unit
 
-### Environment Variables
-Create a `.env` file in the project root:
+**📚 Complete API documentation:** See [API_README.md](API_README.md)
 
-```env
-# Application Settings
-APP_NAME=Diff-Comm Application
-APP_ENV=production
-DEBUG=False
+## 🏗️ Architecture
 
-# Database
-DATABASE_PATH=commission_data.db
-BACKUP_ENABLED=True
-BACKUP_INTERVAL=daily
-MAX_BACKUPS=30
-
-# Security
-SECRET_KEY=your-secret-key-here
-SESSION_TIMEOUT=3600
-PASSWORD_MIN_LENGTH=8
-
-# Features
-ENABLE_MANUAL_SPLITS=True
-ENABLE_AUDIT_LOG=True
-MAX_UPLOAD_SIZE=10MB
+### Dual Interface Design
+```
+┌─────────────────────────────────────────────────────────┐
+│                Commission Calculator Pro                │
+├─────────────────────────────────────────────────────────┤
+│  🌐 Streamlit Web App     │    🔗 FastAPI Backend      │
+│  ├─ Interactive UI        │    ├─ REST endpoints (32)   │
+│  ├─ Dashboard & Reports   │    ├─ Business logic        │
+│  ├─ Data management       │    ├─ Data validation       │
+│  └─ Configuration         │    └─ Auto-documentation    │
+├─────────────────────────────────────────────────────────┤
+│                 📊 Shared Business Logic                │
+│  ├─ Commission calculations with efficiency pay model   │
+│  ├─ Pay period management with automated scheduling     │
+│  ├─ Employee management with status & rate tracking     │
+│  ├─ Business unit configuration with custom rates       │
+│  └─ Data processing with validation & error handling    │
+└─────────────────────────────────────────────────────────┘
 ```
 
-### Advanced Configuration
-
-```python
-# config.py
-COMMISSION_CONFIG = {
-    'calculation_method': 'weighted',  # 'weighted' or 'simple'
-    'rounding_precision': 2,
-    'minimum_commission': 0.00,
-    'maximum_commission': 50000.00,
-    'labor_multiplier': 1.0,
-    'include_benefits': False
-}
+### Modular Structure
+```
+commission_calculator_pro/
+├── 🌐 Web Interface (Streamlit)
+│   ├── app_modular.py           # Main Streamlit application  
+│   └── ui/                      # Modular UI components
+│       ├── dashboard.py         # Analytics dashboard
+│       ├── company_setup.py     # Employee & config management
+│       ├── data_management.py   # Data upload & management
+│       ├── commission_calc.py   # Commission calculations
+│       ├── reports.py           # Reports & analytics
+│       └── utils.py             # Shared utilities
+│
+├── 🔗 REST API Backend
+│   ├── api/
+│   │   ├── main.py              # FastAPI application
+│   │   ├── models/              # Pydantic data models (5 modules)
+│   │   ├── routers/             # API endpoints (7 routers)
+│   │   ├── services/            # Business logic services (6 services)
+│   │   └── adapters/            # Data layer integration
+│   ├── start_api.py             # API startup script
+│   └── test_api.py              # Automated test suite
+│
+├── 📊 Legacy & Support
+│   ├── working_main_app.py      # Original monolithic app (archived)
+│   ├── models/                  # Data models
+│   ├── services/                # Business services
+│   └── utils/                   # Utility functions
+│
+└── 📋 Documentation & Config
+    ├── API_README.md            # Detailed API documentation
+    ├── requirements-api.txt     # API dependencies
+    ├── requirements.txt         # Web app dependencies
+    └── *.py                     # Test & utility scripts
 ```
 
-## 📊 API Reference
+## 💼 Business Logic
 
-### REST API Endpoints (Coming Soon)
-```
-GET    /api/v1/employees          # List all employees
-POST   /api/v1/employees          # Create new employee
-GET    /api/v1/commissions        # Get commission data
-POST   /api/v1/calculate          # Trigger calculation
-GET    /api/v1/reports/{type}     # Generate report
-```
+### Commission Calculation Types
+1. **Lead Generation** - Commission on revenue for leads generated by employee
+2. **Sales** - Commission on revenue for sales closed by employee
+3. **Work Done** - Commission on revenue split among technicians who performed work
 
-## 🧪 Testing
+### Pay Models
+- **Hourly + Commission** - Employee receives hourly pay plus all commission
+- **Efficiency Pay** - Employee receives the higher of hourly pay or commission total
 
-Run the test suite:
+### Advanced Features
+- **Rate Overrides** - Set custom commission rates per employee per business unit
+- **Multi-technician Jobs** - Automatically split work commissions among assigned technicians
+- **Hour Overrides** - Manual timesheet adjustments with tracking and timestamps
+- **Smart Detection** - Automatically identify employees and business units from uploaded data
+
+## 🧪 Testing & Quality
+
+### Automated Testing
+- **32 API Endpoint Tests** - Comprehensive validation of all endpoints
+- **Business Logic Tests** - Commission calculation accuracy verification
+- **Data Validation Tests** - File upload and processing validation
+- **Health Monitoring** - System performance and status checks
+
+### Quality Assurance
+- **Input Validation** - Pydantic models with comprehensive error handling
+- **Error Reporting** - Detailed error messages with actionable guidance
+- **Performance Monitoring** - System metrics (CPU, memory, disk usage)
+- **Security Features** - File validation, size limits, content scanning
+
+## 📈 Performance & Scalability
+
+### Optimizations
+- **Caching Layer** - TTL-based caching for expensive operations (up to 88% memory reduction)
+- **Batch Processing** - Efficient handling of large datasets (5,000+ records)
+- **Memory Optimization** - DataFrame memory usage optimization
+- **Async Processing** - Non-blocking API operations with FastAPI
+
+### Scalability Features
+- **Service Layer Architecture** - Clean separation of concerns
+- **Modular Design** - Easy to extend and maintain
+- **Configuration Management** - Adaptive settings based on data size
+- **Health Monitoring** - Production-ready observability
+
+## 🚀 Deployment
+
+### Development
 ```bash
-# Run all tests
-pytest tests/ -v
+# Web interface
+streamlit run app_modular.py
 
-# Run with coverage
-pytest tests/ -v --cov=.
-
-# Run specific test file
-pytest tests/test_calculator.py -v
+# API backend  
+python start_api.py --reload
 ```
 
-## 📈 Performance Benchmarks
+### Production
+```bash
+# API with multiple workers
+python start_api.py --workers 4 --log-level warning
 
-| Operation | Records | Time | Memory |
-|-----------|---------|------|--------|
-| Data Import | 1,000 | <2s | 50MB |
-| Commission Calc | 5,000 | <5s | 100MB |
-| Report Generation | 10,000 | <10s | 200MB |
-| Dashboard Load | - | <1s | 25MB |
+# Docker deployment available
+docker build -t commission-calculator-pro .
+docker run -p 8000:8000 commission-calculator-pro
+```
+
+### Health Checks
+- `GET /api/v1/health` - Comprehensive system health
+- `GET /api/v1/health/ready` - Kubernetes readiness probe
+- `GET /api/v1/health/live` - Kubernetes liveness probe
+
+## 🔒 Security
+
+- **Input Validation** - Comprehensive Pydantic model validation
+- **File Upload Security** - Size limits (25MB), type validation, content scanning  
+- **Error Handling** - Secure error messages without information leakage
+- **Session Management** - Secure session state with automatic cleanup
+- **CORS Configuration** - Configured for safe cross-origin requests
+
+## 🎉 Recent Major Updates
+
+### v2.0.0 - Complete API Implementation ✨
+- ✅ **32 REST API endpoints** covering all business operations
+- ✅ **Modular Streamlit interface** with 7 focused UI modules  
+- ✅ **Complex commission calculations** with efficiency pay model
+- ✅ **Automated pay period management** with multiple scheduling options
+- ✅ **Advanced file upload system** with validation and error reporting
+- ✅ **Business unit configuration** with custom commission rates
+- ✅ **Employee management** with status tracking and bulk operations
+- ✅ **Dashboard analytics** with interactive charts and KPIs
+- ✅ **Comprehensive testing** with automated test suite
+- ✅ **Production-ready deployment** with health monitoring
+
+### Architecture Transformation 🏗️
+- 🔄 **Migrated from 8,800-line monolith** to clean modular architecture
+- 🚀 **Added FastAPI backend** for scalable integrations and automation
+- 📊 **Enhanced dashboard** with better space utilization and business metrics
+- 🔍 **Fixed revenue column detection** for dynamic data handling
+- ⚡ **Performance optimizations** for large datasets with caching
+- 🧪 **Added comprehensive testing** for reliability and maintainability
 
 ## 🤝 Contributing
 
-We welcome contributions! Please follow these steps:
-
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes
+4. Run tests (`python test_api.py`)
+5. Commit your changes (`git commit -m 'Add amazing feature'`)
+6. Push to the branch (`git push origin feature/amazing-feature`)
+7. Open a Pull Request
 
-### Development Setup
-```bash
-# Install development dependencies
-pip install -r requirements-dev.txt
+## 📞 Support
 
-# Run linting
-flake8 .
+For questions, issues, or feature requests:
 
-# Format code
-black .
-```
+1. **Check Documentation**
+   - [API Documentation](API_README.md) - Complete REST API reference
+   - [Implementation Summary](api_summary.py) - Run for detailed capabilities overview
 
-## 🐛 Troubleshooting
+2. **Run Diagnostics**
+   - `python test_api.py` - Test all API endpoints
+   - `python api_summary.py` - Display implementation status
+   - Check health endpoint: `GET /api/v1/health`
 
-### Common Issues
-
-<details>
-<summary><b>Import fails with "Missing columns" error</b></summary>
-
-Ensure your Excel/CSV file has all required columns. Download the template files from the Data Management page for the correct format.
-</details>
-
-<details>
-<summary><b>Commissions calculate to zero</b></summary>
-
-1. Check that employee hourly rates are set in System Configuration
-2. Verify business unit commission rates are configured
-3. Ensure revenue data is uploaded for the calculation period
-</details>
-
-<details>
-<summary><b>Can't access admin features</b></summary>
-
-Verify you're logged in with an Admin role account. Contact your system administrator to check your permissions.
-</details>
-
-<details>
-<summary><b>Application won't start</b></summary>
-
-1. Check Python version: `python --version` (must be 3.8+)
-2. Reinstall dependencies: `pip install -r requirements.txt --force-reinstall`
-3. Check for port conflicts on 8501
-</details>
-
-## 📱 Roadmap
-
-### Version 2.1 (Q1 2025)
-- [ ] REST API implementation
-- [ ] Mobile responsive design improvements
-- [ ] Advanced forecasting with ML
-- [ ] Email notification system
-
-### Version 3.0 (Q2 2025)
-- [ ] Multi-company support
-- [ ] Custom workflow builder
-- [ ] Integration with popular payroll systems
-- [ ] Real-time collaboration features
+3. **Get Help**
+   - Review comprehensive error logging in the application
+   - Check the automated test suite for examples
+   - Open an issue with detailed steps to reproduce
 
 ## 📄 License
 
 This project is proprietary software. All rights reserved.
 
-## 👥 Team
-
-<div align="center">
-
-| Role | Contact |
-|------|---------|
-| **Project Lead** | AtlasAli1 |
-| **Support** | support@diff-comm.app |
-| **Security** | security@diff-comm.app |
-
-</div>
-
-## 🙏 Acknowledgments
-
-Built with these amazing technologies:
-
-- [Streamlit](https://streamlit.io/) - The fastest way to build data apps
-- [Plotly](https://plotly.com/) - Interactive graphing library
-- [Pandas](https://pandas.pydata.org/) - Data analysis and manipulation
-- [SQLAlchemy](https://www.sqlalchemy.org/) - SQL toolkit and ORM
-- [Pydantic](https://docs.pydantic.dev/) - Data validation using Python type annotations
-
 ---
 
 <div align="center">
 
-**Diff-Comm Application** - Revolutionizing Commission Management 💰
+**🚀 Ready for production use and frontend team integration!**
 
-Made with ❤️ by the Diff-Comm Team
-
-[Report Bug](https://github.com/AtlasAli1/Diff-Comm-Application/issues) • [Request Feature](https://github.com/AtlasAli1/Diff-Comm-Application/issues)
+Built with ❤️ using Python, Streamlit, and FastAPI
 
 </div>

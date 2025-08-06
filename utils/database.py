@@ -24,6 +24,9 @@ class DatabaseManager:
         # Initialize database
         self._init_database()
         
+        # Run migrations for existing databases
+        self._run_migrations()
+        
         # Create initial backup
         self.create_backup("initial")
     
@@ -55,8 +58,9 @@ class DatabaseManager:
                     name TEXT NOT NULL,
                     hourly_rate REAL DEFAULT 0,
                     department TEXT,
-                    employee_id TEXT,
+                    employee_id INTEGER,
                     is_active INTEGER DEFAULT 1,
+                    is_helper INTEGER DEFAULT 0,
                     created_at TEXT,
                     updated_at TEXT,
                     metadata TEXT
@@ -170,6 +174,71 @@ class DatabaseManager:
             cursor.execute('CREATE INDEX IF NOT EXISTS idx_commissions_period ON commissions(period_start, period_end)')
             cursor.execute('CREATE INDEX IF NOT EXISTS idx_audit_log_timestamp ON audit_log(timestamp)')
     
+    def _run_migrations(self):
+        """Run database migrations for existing databases"""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            
+            # Check current table structure
+            cursor.execute("PRAGMA table_info(employees)")
+            columns_info = cursor.fetchall()
+            columns = [column[1] for column in columns_info]
+            column_types = {column[1]: column[2] for column in columns_info}
+            
+            # Add is_helper column if missing
+            if 'is_helper' not in columns:
+                logger.info("Adding is_helper column to employees table")
+                cursor.execute("ALTER TABLE employees ADD COLUMN is_helper INTEGER DEFAULT 0")
+                
+                # Update any existing Helper/Apprentice employees based on metadata
+                cursor.execute("""
+                    UPDATE employees 
+                    SET is_helper = 1 
+                    WHERE metadata LIKE '%"Helper/Apprentice": true%' 
+                       OR metadata LIKE '%helper%' 
+                       OR metadata LIKE '%apprentice%'
+                """)
+                
+                logger.info("Migration completed: is_helper column added")
+            
+            # Check if employee_id column needs to be converted to INTEGER
+            if 'employee_id' in columns and column_types.get('employee_id') == 'TEXT':
+                logger.info("Converting employee_id column from TEXT to INTEGER")
+                
+                # Create new table with correct schema
+                cursor.execute('''
+                    CREATE TABLE employees_new (
+                        id TEXT PRIMARY KEY,
+                        name TEXT NOT NULL,
+                        hourly_rate REAL DEFAULT 0,
+                        department TEXT,
+                        employee_id INTEGER,
+                        is_active INTEGER DEFAULT 1,
+                        is_helper INTEGER DEFAULT 0,
+                        created_at TEXT,
+                        updated_at TEXT,
+                        metadata TEXT
+                    )
+                ''')
+                
+                # Copy data, converting employee_id to INTEGER where possible
+                cursor.execute('''
+                    INSERT INTO employees_new 
+                    SELECT id, name, hourly_rate, department, 
+                           CASE 
+                               WHEN employee_id GLOB '[0-9]*' THEN CAST(employee_id AS INTEGER)
+                               ELSE NULL 
+                           END as employee_id,
+                           is_active, is_helper, created_at, updated_at, metadata
+                    FROM employees
+                ''')
+                
+                # Replace old table
+                cursor.execute('DROP TABLE employees')
+                cursor.execute('ALTER TABLE employees_new RENAME TO employees')
+                
+                logger.info("Migration completed: employee_id column converted to INTEGER")
+    
     def save_employee(self, employee_data: Dict[str, Any]) -> bool:
         """Save or update employee"""
         try:
@@ -178,9 +247,9 @@ class DatabaseManager:
                 
                 cursor.execute('''
                     INSERT OR REPLACE INTO employees 
-                    (id, name, hourly_rate, department, employee_id, is_active, 
+                    (id, name, hourly_rate, department, employee_id, is_active, is_helper,
                      created_at, updated_at, metadata)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ''', (
                     employee_data['id'],
                     employee_data['name'],
@@ -188,6 +257,7 @@ class DatabaseManager:
                     employee_data.get('department'),
                     employee_data.get('employee_id'),
                     1 if employee_data.get('is_active', True) else 0,
+                    1 if employee_data.get('is_helper', False) else 0,
                     employee_data.get('created_at', datetime.now().isoformat()),
                     datetime.now().isoformat(),
                     json.dumps(employee_data.get('metadata', {}))
